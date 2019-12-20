@@ -91,24 +91,22 @@ public class GadgetMenu implements Listener {
         Player p = (Player) e.getWhoClicked();
         ItemStack i = e.getCurrentItem();
 
-        if(i == null || i.getType().equals(this.fillerMaterial)){
-            p.playSound(p.getLocation(), this.bad, 1 ,1);
+        if(i == null || i.getType().equals(this.fillerMaterial) || e.getRawSlot() > 53){
             return;
         }
 
+        p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_HAT, 1 ,1);
+
         if(i.getType().equals(Material.GREEN_CONCRETE)){
 
-            p.playSound(p.getLocation(), good, 1 ,1);
             teleportManager.acceptRequest(p);
 
         }else if(i.getType().equals(Material.RED_CONCRETE)){
 
-            p.playSound(p.getLocation(), good, 1 ,1);
             teleportManager.denyRequest(p);
 
         }else if(i.getType().equals(Material.PLAYER_HEAD)){
 
-            p.playSound(p.getLocation(), good, 1 ,1);
             teleportManager.sendRequest(p, Bukkit.getPlayer(i.getItemMeta().getDisplayName()));
 
         }else if(i.getType().equals(Material.WHITE_BED)){
@@ -120,7 +118,6 @@ public class GadgetMenu implements Listener {
             }
 
         }else if(i.getType().equals(Material.GREEN_BED)){
-            p.playSound(p.getLocation(), good, 1, 1);
             homeManager.addHome(p, p.getLocation());
         }
     }

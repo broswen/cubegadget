@@ -18,15 +18,23 @@ public class CubeGadget extends JavaPlugin implements Listener {
         System.out.println("Disabling CubeGadget");
         super.onDisable();
 
+        homeManager.saveHomes(getConfig());
+        saveConfig();
+
     }
 
     @Override
     public void onEnable() {
         System.out.println("Enabling CubeGadget");
         super.onEnable();
+
+        this.saveDefaultConfig();
+
         getServer().getPluginManager().registerEvents(this, this);
         teleportManager = new TeleportManager();
         homeManager = new HomeManager();
+
+        homeManager.loadHomes(getConfig());
     }
 
     @EventHandler
