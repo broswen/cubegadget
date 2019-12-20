@@ -20,8 +20,9 @@ public class GadgetMenu implements Listener {
     private Sound good, bad;
     private TeleportManager teleportManager;
     private HomeManager homeManager;
+    private CooldownManager cooldownManager;
     private Player owner;
-    public GadgetMenu(Player owner, TeleportManager teleportManager, HomeManager homeManager, Material filler, Sound good, Sound bad){
+    public GadgetMenu(Player owner, TeleportManager teleportManager, HomeManager homeManager, CooldownManager cooldownManager, Material filler, Sound good, Sound bad){
         inventory = Bukkit.createInventory(null, 54, "CubeGadget");
         this.owner = owner;
         this.fillerMaterial = filler;
@@ -29,10 +30,18 @@ public class GadgetMenu implements Listener {
         this.bad = bad;
         this.teleportManager = teleportManager;
         this.homeManager = homeManager;
+        this.cooldownManager = cooldownManager;
 
-        setIcon(1, Material.GREEN_CONCRETE, "ACCEPT REQUEST");
-        setIcon(3, Material.RED_CONCRETE, "DENY REQUEST");
+        setIcon(1, Material.GREEN_CONCRETE, "ACCEPT REQUEST", "Accept teleport request");
+        setIcon(3, Material.RED_CONCRETE, "DENY REQUEST", "Deny teleport request");
         setIcon(5, Material.GREEN_BED, "ADD HOME", "Shift + Click to remove homes");
+
+        Location lastPosition = teleportManager.getLastPosition(owner);
+        if(lastPosition == null){
+            setIcon(7, Material.END_PORTAL_FRAME, "BACK");
+        }else{
+            setIcon(7, Material.END_PORTAL_FRAME, "BACK", lastPosition.getBlockX() + "," + lastPosition.getBlockY() + "," + lastPosition.getBlockZ());
+        }
 
         populateWithHomes(9);
         populateWithHeads(18);
@@ -98,14 +107,25 @@ public class GadgetMenu implements Listener {
         p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_HAT, 1 ,1);
 
         if(i.getType().equals(Material.GREEN_CONCRETE)){
-
             teleportManager.acceptRequest(p);
-
+            return;
         }else if(i.getType().equals(Material.RED_CONCRETE)){
-
             teleportManager.denyRequest(p);
+            return;
+        }else if(i.getType().equals(Material.GREEN_BED)) {
+            homeManager.addHome(p, p.getLocation());
+            return;
+        }
 
-        }else if(i.getType().equals(Material.PLAYER_HEAD)){
+        if(!cooldownManager.canAction(p)){
+            p.sendMessage("[] Please wait " + cooldownManager.DELAY/1000 + " seconds between teleports.");
+            return;
+        }
+
+        cooldownManager.setLastAction(p);
+
+
+        if(i.getType().equals(Material.PLAYER_HEAD)){
 
             teleportManager.sendRequest(p, Bukkit.getPlayer(i.getItemMeta().getDisplayName()));
 
@@ -116,9 +136,8 @@ public class GadgetMenu implements Listener {
             }else{
                 homeManager.goToHome(p, index);
             }
-
-        }else if(i.getType().equals(Material.GREEN_BED)){
-            homeManager.addHome(p, p.getLocation());
+        }else if(i.getType().equals(Material.END_PORTAL_FRAME)){
+            teleportManager.back(p);
         }
     }
 }

@@ -15,8 +15,10 @@ import java.util.UUID;
 public class HomeManager {
     private final int MAX_HOMES = 9;
     private HashMap<UUID, ArrayList<Location>> playerHomes;
-    public HomeManager(){
+    private TeleportManager teleportManager;
+    public HomeManager(TeleportManager teleportManager){
        playerHomes = new HashMap<>();
+       this.teleportManager = teleportManager;
     }
 
     public void addHome(Player p, Location home){
@@ -63,6 +65,8 @@ public class HomeManager {
             p.sendMessage("[] Error finding that home.");
             return;
         }
+
+        teleportManager.updateLastPosition(p);
         p.getWorld().playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1, 1);
         p.teleport(playerHomes.get(p.getUniqueId()).get(index));
         p.getWorld().playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1, 1);

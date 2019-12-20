@@ -1,6 +1,7 @@
 package com.broswen.cubegadget;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
@@ -10,8 +11,10 @@ import java.util.UUID;
 public class TeleportManager {
 
     private HashMap<UUID, TeleportRequest> lastRequests;
+    private HashMap<UUID, Location> lastPositions;
     public TeleportManager(){
         lastRequests = new HashMap<>();
+        lastPositions = new HashMap<>();
     }
 
     public void sendRequest(Player from, Player to){
@@ -41,6 +44,7 @@ public class TeleportManager {
         lastRequests.remove(from.getUniqueId());
         from.sendMessage("[] You accepted " + ChatColor.YELLOW + req.from.getDisplayName() + ChatColor.RESET + "'s request.");
         req.from.sendMessage("[] " + ChatColor.YELLOW + from.getDisplayName() + ChatColor.RESET + " accepted your request.");
+        lastPositions.put(req.from.getUniqueId(), req.from.getLocation());
         req.from.getWorld().playSound(req.from.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1, 1);
         req.from.teleport(from.getLocation());
         req.from.getWorld().playSound(req.from.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1, 1);
@@ -62,6 +66,30 @@ public class TeleportManager {
         req.from.sendMessage("[] " + ChatColor.YELLOW + from.getDisplayName() + ChatColor.RESET + " denied your request.");
         req.from.playSound(req.from.getLocation(), Sound.BLOCK_NOTE_BLOCK_COW_BELL,1, .5f);
     }
+
+    public void back(Player p) {
+        if(!lastPositions.containsKey(p.getUniqueId())){
+            p.sendMessage("[] You don't have a previous location.");
+            p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_COW_BELL,1, .5f);
+            return;
+        }
+
+        Location temp = p.getLocation();
+        p.getWorld().playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1, 1);
+        p.teleport(lastPositions.get(p.getUniqueId()));
+        p.getWorld().playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1, 1);
+        lastPositions.put(p.getUniqueId(), temp);
+
+    }
+
+    public void updateLastPosition(Player p){
+        lastPositions.put(p.getUniqueId(), p.getLocation());
+    }
+
+    public Location getLastPosition(Player p){
+        return lastPositions.get(p.getUniqueId());
+    }
+
     private class TeleportRequest{
         public Player from;
         public long sent;
