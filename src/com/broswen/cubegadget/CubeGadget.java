@@ -28,6 +28,8 @@ public class CubeGadget extends JavaPlugin implements Listener {
         System.out.println("Enabling CubeGadget");
         super.onEnable();
 
+        this.getCommand("gadget").setExecutor(new GadgetCommand());
+
         this.saveDefaultConfig();
 
         getServer().getPluginManager().registerEvents(this, this);

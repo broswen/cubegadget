@@ -3,3 +3,8 @@ version: 1.0
 api-version: 1.13
 author: broswen
 main: com.broswen.cubegadget.CubeGadget
+
+commands:
+  gadget:
+    description: gives a gadget item
+    usage: /gadget
