@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -42,6 +43,7 @@ public class GadgetMenu implements Listener {
         }else{
             setIcon(7, Material.END_PORTAL_FRAME, "BACK", lastPosition.getBlockX() + "," + lastPosition.getBlockY() + "," + lastPosition.getBlockZ());
         }
+        setIcon(8, Material.CRAFTING_TABLE, "WORKBENCH", "Click for crafting table");
 
         populateWithHomes(9);
         populateWithHeads(18);
@@ -114,6 +116,9 @@ public class GadgetMenu implements Listener {
             return;
         }else if(i.getType().equals(Material.GREEN_BED)) {
             homeManager.addHome(p, p.getLocation());
+            return;
+        }else if(i.getType().equals(Material.CRAFTING_TABLE)){
+            p.openWorkbench(p.getLocation(),true);
             return;
         }
 
