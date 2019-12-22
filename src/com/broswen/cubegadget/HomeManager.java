@@ -1,9 +1,6 @@
 package com.broswen.cubegadget;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Sound;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
@@ -14,19 +11,19 @@ import java.util.UUID;
 
 public class HomeManager {
     private final int MAX_HOMES = 9;
-    private HashMap<UUID, ArrayList<Location>> playerHomes;
+    private HashMap<UUID, ArrayList<Home>> playerHomes;
     private TeleportManager teleportManager;
     public HomeManager(TeleportManager teleportManager){
        playerHomes = new HashMap<>();
        this.teleportManager = teleportManager;
     }
 
-    public void addHome(Player p, Location home){
+    public void addHome(Player p, Location location, Material material){
         //check if exists
         if(!playerHomes.containsKey(p.getUniqueId())){
             playerHomes.put(p.getUniqueId(), new ArrayList<>());
         }
-        ArrayList<Location> homes = playerHomes.get(p.getUniqueId());
+        ArrayList<Home> homes = playerHomes.get(p.getUniqueId());
         if(homes.size() >= MAX_HOMES){
             p.sendMessage("[] You already have the maximum number of homes (" + MAX_HOMES + ").");
             p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_COW_BELL, 1, .5f);
@@ -35,7 +32,7 @@ public class HomeManager {
         p.sendMessage("[] A new home has been added.");
         p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1, 1);
         p.closeInventory();
-        playerHomes.get(p.getUniqueId()).add(home);
+        playerHomes.get(p.getUniqueId()).add(new Home(material, location));
     }
 
     public void removeHome(Player p, int index){
@@ -43,14 +40,14 @@ public class HomeManager {
         if(!playerHomes.containsKey(p.getUniqueId())){
             playerHomes.put(p.getUniqueId(), new ArrayList<>());
         }
-        ArrayList<Location> homes = playerHomes.get(p.getUniqueId());
+        ArrayList<Home> homes = playerHomes.get(p.getUniqueId());
         p.sendMessage("[] A home has been removed.");
         p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_COW_BELL, 1, .5f);
         p.closeInventory();
         playerHomes.get(p.getUniqueId()).remove(index);
     }
 
-    public ArrayList<Location> getHomes(Player p){
+    public ArrayList<Home> getHomes(Player p){
         if(!playerHomes.containsKey(p.getUniqueId())){
             playerHomes.put(p.getUniqueId(), new ArrayList<>());
         }
@@ -68,13 +65,18 @@ public class HomeManager {
 
         teleportManager.updateLastPosition(p);
         p.getWorld().playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1, 1);
-        p.teleport(playerHomes.get(p.getUniqueId()).get(index));
+        p.teleport(playerHomes.get(p.getUniqueId()).get(index).location);
         p.getWorld().playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1, 1);
     }
 
     public String serializeLocation(Location l){
         return l.getWorld().getName() + "," + l.getBlockX() + "," + l.getBlockY() + "," + l.getBlockZ() + ","
                 + l.getYaw() + "," + l.getPitch();
+    }
+
+    public String serializeHome(Home h){
+        return h.material.toString() + "," + h.location.getWorld().getName() + "," + h.location.getBlockX() + "," + h.location.getBlockY() + "," + h.location.getBlockZ() + ","
+                + h.location.getYaw() + "," + h.location.getPitch();
     }
 
     public Location deserializeLocation(String s){
@@ -90,12 +92,26 @@ public class HomeManager {
         return new Location(w, x, y, z, yaw, pitch);
     }
 
+    public Home deserializeHome(String s){
+        String[] parts = s.split(",");
+        if(parts.length < 6) return null;
+        World w = Bukkit.getWorld(parts[1]);
+        if(w == null) return null;
+        double x = Double.parseDouble(parts[2]);
+        double y = Double.parseDouble(parts[3]);
+        double z = Double.parseDouble(parts[4]);
+        float yaw = Float.parseFloat(parts[5]);
+        float pitch = Float.parseFloat(parts[6]);
+        return new Home(Material.getMaterial(parts[0]), new Location(w, x, y, z, yaw, pitch));
+    }
+
     public void saveHomes(FileConfiguration config) {
         for(UUID uuid : playerHomes.keySet()){
-            ArrayList<Location> homes = playerHomes.get(uuid);
+            ArrayList<Home> homes = playerHomes.get(uuid);
             ArrayList<String> strHomes = new ArrayList<>();
-            for(Location l : homes){
-                strHomes.add(serializeLocation(l));
+            for(Home h : homes){
+                //strHomes.add(serializeLocation(l));
+                strHomes.add(serializeHome(h));
             }
             config.set(uuid.toString(), strHomes);
         }
@@ -106,11 +122,14 @@ public class HomeManager {
         for(String k : config.getKeys(false)){
             UUID uuid = UUID.fromString(k);
             List<String> homes = config.getStringList(k);
-            ArrayList<Location> locHomes = new ArrayList<>();
+            ArrayList<Home> locHomes = new ArrayList<>();
             for(String h : homes){
-                locHomes.add(deserializeLocation(h));
+                //locHomes.add(deserializeLocation(h));
+                locHomes.add(deserializeHome(h));
             }
             playerHomes.put(uuid, locHomes);
         }
     }
 }
+
+

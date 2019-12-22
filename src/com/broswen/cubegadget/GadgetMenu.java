@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class GadgetMenu implements Listener {
-    private Inventory inventory;
+    private Inventory inventory, icons;
     private Material fillerMaterial;
     private Sound good, bad;
     private TeleportManager teleportManager;
@@ -25,6 +25,7 @@ public class GadgetMenu implements Listener {
     private Player owner;
     public GadgetMenu(Player owner, TeleportManager teleportManager, HomeManager homeManager, CooldownManager cooldownManager, Material filler, Sound good, Sound bad){
         inventory = Bukkit.createInventory(null, 54, "CubeGadget");
+        icons = Bukkit.createInventory(null, 9, "Icons");
         this.owner = owner;
         this.fillerMaterial = filler;
         this.good = good;
@@ -33,17 +34,28 @@ public class GadgetMenu implements Listener {
         this.homeManager = homeManager;
         this.cooldownManager = cooldownManager;
 
-        setIcon(1, Material.GREEN_CONCRETE, "ACCEPT REQUEST", "Accept teleport request");
-        setIcon(3, Material.RED_CONCRETE, "DENY REQUEST", "Deny teleport request");
-        setIcon(5, Material.GREEN_BED, "ADD HOME", "Shift + Click to remove homes");
+        //setting icon chooser inventory
+        setIcon(icons, 0, Material.GRASS_BLOCK, "Grass");
+        setIcon(icons, 1, Material.SAND, "Sand");
+        setIcon(icons, 2, Material.STONE, "Stone");
+        setIcon(icons, 3, Material.OAK_LOG, "Log");
+        setIcon(icons, 4, Material.BRICKS, "Bricks");
+        setIcon(icons, 5, Material.STONE_BRICKS, "Stone Bricks");
+        setIcon(icons, 6, Material.END_STONE, "End Stone");
+        setIcon(icons, 7, Material.NETHER_BRICK, "Nether Bricks");
+        setIcon(icons, 8, Material.PRISMARINE, "Prismarine");
+
+        setIcon(inventory,1, Material.GREEN_CONCRETE, "ACCEPT REQUEST", "Accept teleport request");
+        setIcon(inventory,3, Material.RED_CONCRETE, "DENY REQUEST", "Deny teleport request");
+        setIcon(inventory, 5, Material.GREEN_BED, "ADD HOME", "Shift + Click to remove homes");
 
         Location lastPosition = teleportManager.getLastPosition(owner);
         if(lastPosition == null){
-            setIcon(7, Material.END_PORTAL_FRAME, "BACK");
+            setIcon(inventory, 7, Material.END_PORTAL_FRAME, "BACK");
         }else{
-            setIcon(7, Material.END_PORTAL_FRAME, "BACK", lastPosition.getBlockX() + "," + lastPosition.getBlockY() + "," + lastPosition.getBlockZ());
+            setIcon(inventory, 7, Material.END_PORTAL_FRAME, "BACK", lastPosition.getBlockX() + "," + lastPosition.getBlockY() + "," + lastPosition.getBlockZ());
         }
-        setIcon(8, Material.CRAFTING_TABLE, "WORKBENCH", "Click for crafting table");
+        setIcon(inventory, 8, Material.CRAFTING_TABLE, "WORKBENCH", "Click for crafting table");
 
         populateWithHomes(9);
         populateWithHeads(18);
@@ -73,36 +85,41 @@ public class GadgetMenu implements Listener {
     }
 
     private void populateWithHomes(int start){
-        ArrayList<Location> homes = homeManager.getHomes(owner);
+        ArrayList<Home> homes = homeManager.getHomes(owner);
         for(int i = 0; i < homes.size(); i++){
-            setIcon(i + start, Material.WHITE_BED,
-                    homes.get(i).getBlockX() + "," + homes.get(i).getBlockY() + "," + homes.get(i).getBlockZ(),
-                    String.valueOf((int) homes.get(i).distance(owner.getLocation())));
+            setIcon(inventory, i + start, homes.get(i).material,
+                    homes.get(i).location.getBlockX() + "," + homes.get(i).location.getBlockY() + "," + homes.get(i).location.getBlockZ(),
+                    String.valueOf((int) homes.get(i).location.distance(owner.getLocation())));
         }
     }
 
-    private void setIcon(int position, Material material, String title){
-        setIcon(position,material,title, "");
+    private void setIcon(Inventory inv, int position, Material material, String title){
+        setIcon(inv, position,material,title, "");
     }
-    private void setIcon(int position, Material material, String title, String desc){
+    private void setIcon(Inventory inv, int position, Material material, String title, String desc){
         ItemStack i = new ItemStack(material);
         ItemMeta im = i.getItemMeta();
         im.setLore(Arrays.asList(desc));
         im.setDisplayName(title);
         i.setItemMeta(im);
-        this.inventory.setItem(position, i);
+        inv.setItem(position, i);
     }
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent e){
         //ignore if not this menu
-        if(e.getInventory() != this.inventory) return;
+        if(e.getInventory() != this.inventory && e.getInventory() != icons) return;
         e.setCancelled(true);
 
         Player p = (Player) e.getWhoClicked();
         ItemStack i = e.getCurrentItem();
 
         if(i == null || i.getType().equals(this.fillerMaterial) || e.getRawSlot() > 53){
+            return;
+        }
+
+        if(e.getInventory() == icons){
+            homeManager.addHome(p, p.getLocation(), i.getType());
             return;
         }
 
@@ -115,7 +132,7 @@ public class GadgetMenu implements Listener {
             teleportManager.denyRequest(p);
             return;
         }else if(i.getType().equals(Material.GREEN_BED)) {
-            homeManager.addHome(p, p.getLocation());
+            p.openInventory(icons);
             return;
         }else if(i.getType().equals(Material.CRAFTING_TABLE)){
             p.openWorkbench(p.getLocation(),true);
@@ -134,7 +151,7 @@ public class GadgetMenu implements Listener {
 
             teleportManager.sendRequest(p, Bukkit.getPlayer(i.getItemMeta().getDisplayName()));
 
-        }else if(i.getType().equals(Material.WHITE_BED)){
+        }else if(e.getRawSlot() > 8 && e.getRawSlot() < 18){
             int index = e.getRawSlot() - 9;
             if(e.isShiftClick()){
                 homeManager.removeHome(p, index);
