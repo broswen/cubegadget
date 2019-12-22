@@ -4,11 +4,14 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
 
 import java.util.HashMap;
 import java.util.UUID;
 
-public class TeleportManager {
+public class TeleportManager implements Listener {
 
     private HashMap<UUID, TeleportRequest> lastRequests;
     private HashMap<UUID, Location> lastPositions;
@@ -88,6 +91,11 @@ public class TeleportManager {
 
     public Location getLastPosition(Player p){
         return lastPositions.get(p.getUniqueId());
+    }
+
+    @EventHandler
+    public void onPlayerDeath(PlayerDeathEvent e){
+        updateLastPosition(e.getEntity());
     }
 
     private class TeleportRequest{

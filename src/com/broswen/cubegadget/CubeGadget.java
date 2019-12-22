@@ -38,6 +38,7 @@ public class CubeGadget extends JavaPlugin implements Listener {
         homeManager = new HomeManager(teleportManager);
         cooldownManager = new CooldownManager();
 
+        getServer().getPluginManager().registerEvents(teleportManager, this);
         homeManager.loadHomes(getConfig());
     }
 
