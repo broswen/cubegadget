@@ -77,7 +77,15 @@ public class TeleportManager implements Listener {
             return;
         }
 
+
+
         Location temp = p.getLocation();
+
+        if(!HomeManager.isSafe(lastPositions.get(p.getUniqueId()))){
+            p.sendMessage("[] Your last position is no longer safe (There are blocks in the way).");
+            p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_COW_BELL, 1, .5f);
+            return;
+        }
         p.getWorld().playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1, 1);
         p.teleport(lastPositions.get(p.getUniqueId()));
         p.getWorld().playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1, 1);

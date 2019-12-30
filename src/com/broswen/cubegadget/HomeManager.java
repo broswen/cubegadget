@@ -1,6 +1,7 @@
 package com.broswen.cubegadget;
 
 import org.bukkit.*;
+import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
@@ -26,6 +27,12 @@ public class HomeManager {
         ArrayList<Home> homes = playerHomes.get(p.getUniqueId());
         if(homes.size() >= MAX_HOMES){
             p.sendMessage("[] You already have the maximum number of homes (" + MAX_HOMES + ").");
+            p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_COW_BELL, 1, .5f);
+            return;
+        }
+
+        if(!isSafe(location)){
+            p.sendMessage("[] The specified location is unsafe.");
             p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_COW_BELL, 1, .5f);
             return;
         }
@@ -62,20 +69,25 @@ public class HomeManager {
             p.sendMessage("[] Error finding that home.");
             return;
         }
-
+        Home home = playerHomes.get(p.getUniqueId()).get(index);
+        if(!isSafe(home.location)){
+            p.sendMessage("[] That home is no longer safe (There are blocks in the way).");
+            p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_COW_BELL, 1, .5f);
+            return;
+        }
         teleportManager.updateLastPosition(p);
         p.getWorld().playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1, 1);
-        p.teleport(playerHomes.get(p.getUniqueId()).get(index).location);
+        p.teleport(home.location.add(0,.05,0));
         p.getWorld().playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1, 1);
     }
 
     public String serializeLocation(Location l){
-        return l.getWorld().getName() + "," + l.getBlockX() + "," + l.getBlockY() + "," + l.getBlockZ() + ","
+        return l.getWorld().getName() + "," + l.getX() + "," + l.getY() + "," + l.getZ() + ","
                 + l.getYaw() + "," + l.getPitch();
     }
 
     public String serializeHome(Home h){
-        return h.material.toString() + "," + h.location.getWorld().getName() + "," + h.location.getBlockX() + "," + h.location.getBlockY() + "," + h.location.getBlockZ() + ","
+        return h.material.toString() + "," + h.location.getWorld().getName() + "," + h.location.getX() + "," + h.location.getY() + "," + h.location.getZ() + ","
                 + h.location.getYaw() + "," + h.location.getPitch();
     }
 
@@ -105,12 +117,15 @@ public class HomeManager {
         return new Home(Material.getMaterial(parts[0]), new Location(w, x, y, z, yaw, pitch));
     }
 
+    public static boolean isSafe(Location l){
+        return l.getBlock().isPassable() || l.getBlock().getRelative(BlockFace.UP).isPassable();
+    }
+
     public void saveHomes(FileConfiguration config) {
         for(UUID uuid : playerHomes.keySet()){
             ArrayList<Home> homes = playerHomes.get(uuid);
             ArrayList<String> strHomes = new ArrayList<>();
             for(Home h : homes){
-                //strHomes.add(serializeLocation(l));
                 strHomes.add(serializeHome(h));
             }
             config.set(uuid.toString(), strHomes);

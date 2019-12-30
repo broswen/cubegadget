@@ -5,7 +5,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -13,23 +12,19 @@ import org.bukkit.inventory.meta.SkullMeta;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 public class GadgetMenu implements Listener {
     private Inventory inventory, icons;
     private Material fillerMaterial;
-    private Sound good, bad;
     private TeleportManager teleportManager;
     private HomeManager homeManager;
     private CooldownManager cooldownManager;
     private Player owner;
-    public GadgetMenu(Player owner, TeleportManager teleportManager, HomeManager homeManager, CooldownManager cooldownManager, Material filler, Sound good, Sound bad){
+    public GadgetMenu(Player owner, TeleportManager teleportManager, HomeManager homeManager, CooldownManager cooldownManager, Material filler){
         inventory = Bukkit.createInventory(null, 54, "CubeGadget");
         icons = Bukkit.createInventory(null, 9, "Icons");
         this.owner = owner;
         this.fillerMaterial = filler;
-        this.good = good;
-        this.bad = bad;
         this.teleportManager = teleportManager;
         this.homeManager = homeManager;
         this.cooldownManager = cooldownManager;
@@ -42,7 +37,7 @@ public class GadgetMenu implements Listener {
         setIcon(icons, 4, Material.BRICKS, "Bricks");
         setIcon(icons, 5, Material.STONE_BRICKS, "Stone Bricks");
         setIcon(icons, 6, Material.END_STONE, "End Stone");
-        setIcon(icons, 7, Material.NETHER_BRICK, "Nether Bricks");
+        setIcon(icons, 7, Material.NETHER_BRICKS, "Nether Bricks");
         setIcon(icons, 8, Material.PRISMARINE, "Prismarine");
 
         setIcon(inventory,1, Material.GREEN_CONCRETE, "ACCEPT REQUEST", "Accept teleport request");
@@ -88,15 +83,14 @@ public class GadgetMenu implements Listener {
         ArrayList<Home> homes = homeManager.getHomes(owner);
         for(int i = 0; i < homes.size(); i++){
             setIcon(inventory, i + start, homes.get(i).material,
-                    homes.get(i).location.getBlockX() + "," + homes.get(i).location.getBlockY() + "," + homes.get(i).location.getBlockZ(),
-                    String.valueOf((int) homes.get(i).location.distance(owner.getLocation())));
+                    homes.get(i).location.getBlockX() + "," + homes.get(i).location.getBlockY() + "," + homes.get(i).location.getBlockZ());
         }
     }
 
-    private void setIcon(Inventory inv, int position, Material material, String title){
+    public static void setIcon(Inventory inv, int position, Material material, String title){
         setIcon(inv, position,material,title, "");
     }
-    private void setIcon(Inventory inv, int position, Material material, String title, String desc){
+    public static void setIcon(Inventory inv, int position, Material material, String title, String desc){
         ItemStack i = new ItemStack(material);
         ItemMeta im = i.getItemMeta();
         im.setLore(Arrays.asList(desc));
