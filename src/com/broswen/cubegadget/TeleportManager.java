@@ -87,7 +87,9 @@ public class TeleportManager implements Listener {
             return;
         }
         p.getWorld().playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1, 1);
-        p.teleport(lastPositions.get(p.getUniqueId()));
+        Location teleport = lastPositions.get((p.getUniqueId()));
+        teleport.getWorld().refreshChunk(teleport.getChunk().getX(), teleport.getChunk().getZ());
+        p.teleport(teleport);
         p.getWorld().playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1, 1);
         lastPositions.put(p.getUniqueId(), temp);
 

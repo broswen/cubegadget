@@ -77,6 +77,7 @@ public class HomeManager {
         }
         teleportManager.updateLastPosition(p);
         p.getWorld().playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1, 1);
+        home.location.getWorld().refreshChunk(home.location.getChunk().getX(), home.location.getChunk().getZ());
         p.teleport(home.location.add(0,.05,0));
         p.getWorld().playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1, 1);
     }
