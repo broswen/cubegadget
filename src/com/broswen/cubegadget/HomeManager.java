@@ -88,7 +88,7 @@ public class HomeManager {
     }
 
     public String serializeHome(Home h){
-        return h.material.toString() + "," + h.location.getWorld().getName() + "," + h.location.getX() + "," + h.location.getY() + "," + h.location.getZ() + ","
+        return h.material.toString() + "," + h.location.getWorld().getName() + "," + h.location.getBlockX() + "," + h.location.getBlockY() + "," + h.location.getBlockZ() + ","
                 + h.location.getYaw() + "," + h.location.getPitch();
     }
 
