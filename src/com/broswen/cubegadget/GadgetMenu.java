@@ -108,6 +108,7 @@ public class GadgetMenu implements Listener {
         Player p = (Player) e.getWhoClicked();
         ItemStack i = e.getCurrentItem();
 
+
         if(i == null || i.getType().equals(this.fillerMaterial) || e.getRawSlot() > 53){
             return;
         }
@@ -142,8 +143,7 @@ public class GadgetMenu implements Listener {
 
 
         if(i.getType().equals(Material.PLAYER_HEAD)){
-
-            teleportManager.sendRequest(p, Bukkit.getPlayer(i.getItemMeta().getDisplayName()));
+            teleportManager.sendRequest(p, Bukkit.getPlayer(i.getItemMeta().getDisplayName()), e.isShiftClick());
 
         }else if(e.getRawSlot() > 8 && e.getRawSlot() < 18){
             int index = e.getRawSlot() - 9;

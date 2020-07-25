@@ -5,6 +5,7 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
@@ -21,6 +22,8 @@ public class CubeGadget extends JavaPlugin implements Listener {
     public void onDisable() {
         System.out.println("Disabling CubeGadget");
         super.onDisable();
+
+        HandlerList.unregisterAll((Listener) this);
 
         homeManager.saveHomes(getConfig());
         saveConfig();
