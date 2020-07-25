@@ -94,9 +94,6 @@ public class HomeManager {
     }
 
     public String serializeHome(Home h){
-        System.out.println("Saving Home: "+ h.material.toString() + "," + h.location.getWorld().getName() + "," + h.location.getX() + "," + h.location.getY() + "," + h.location.getZ() + ","
-                + h.location.getYaw() + "," + h.location.getPitch());
-
         return h.material.toString() + "," + h.location.getWorld().getName() + "," + h.location.getX() + "," + h.location.getY() + "," + h.location.getZ() + ","
                 + h.location.getYaw() + "," + h.location.getPitch();
     }
@@ -114,7 +111,6 @@ public class HomeManager {
         Location loc = new Location(w, x, y, z, yaw, pitch);
 
         logger.debug("Deserialize Location: {}", loc);
-        System.out.println("Deserialize Location: " + loc);
 
         return loc;
     }
@@ -131,7 +127,6 @@ public class HomeManager {
         float pitch = Float.parseFloat(parts[6]);
 
         Home home = new Home(Material.getMaterial(parts[0]), new Location(w, x, y, z, yaw, pitch));
-        System.out.println("Deserialize Home: " + home);
 
         return home;
     }
