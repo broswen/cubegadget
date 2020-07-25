@@ -55,6 +55,17 @@ public class CubeGadget extends JavaPlugin implements Listener {
         ItemStack i = p.getInventory().getItemInMainHand();
         if(!i.getType().equals(Material.COMPASS) || !i.getItemMeta().getDisplayName().equals("Gadget")) return;
         e.setCancelled(true);
+        if(p.isSneaking()){
+            if(!cooldownManager.canAction(p)){
+                p.sendMessage("[] Please wait " + cooldownManager.DELAY/1000 + " seconds between teleports.");
+                return;
+            }
+
+            cooldownManager.setLastAction(p);
+
+            teleportManager.back(p);
+            return;
+        }
         GadgetMenu menu = new GadgetMenu(p, teleportManager, homeManager, cooldownManager, Material.GRAY_STAINED_GLASS_PANE);
         menu.show(p);
         getServer().getPluginManager().registerEvents(menu, this);

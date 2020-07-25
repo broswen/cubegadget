@@ -1,5 +1,7 @@
 package com.broswen.cubegadget;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bukkit.*;
 import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -11,6 +13,10 @@ import java.util.List;
 import java.util.UUID;
 
 public class HomeManager {
+
+    private static Logger logger = LogManager.getLogger(HomeManager.class);
+
+
     private final int MAX_HOMES = 9;
     private HashMap<UUID, ArrayList<Home>> playerHomes;
     private TeleportManager teleportManager;
@@ -88,7 +94,10 @@ public class HomeManager {
     }
 
     public String serializeHome(Home h){
-        return h.material.toString() + "," + h.location.getWorld().getName() + "," + h.location.getBlockX() + "," + h.location.getBlockY() + "," + h.location.getBlockZ() + ","
+        System.out.println("Saving Home: "+ h.material.toString() + "," + h.location.getWorld().getName() + "," + h.location.getX() + "," + h.location.getY() + "," + h.location.getZ() + ","
+                + h.location.getYaw() + "," + h.location.getPitch());
+
+        return h.material.toString() + "," + h.location.getWorld().getName() + "," + h.location.getX() + "," + h.location.getY() + "," + h.location.getZ() + ","
                 + h.location.getYaw() + "," + h.location.getPitch();
     }
 
@@ -102,7 +111,12 @@ public class HomeManager {
         double z = Double.parseDouble(parts[3]);
         float yaw = Float.parseFloat(parts[4]);
         float pitch = Float.parseFloat(parts[5]);
-        return new Location(w, x, y, z, yaw, pitch);
+        Location loc = new Location(w, x, y, z, yaw, pitch);
+
+        logger.debug("Deserialize Location: {}", loc);
+        System.out.println("Deserialize Location: " + loc);
+
+        return loc;
     }
 
     public Home deserializeHome(String s){
@@ -115,7 +129,11 @@ public class HomeManager {
         double z = Double.parseDouble(parts[4]);
         float yaw = Float.parseFloat(parts[5]);
         float pitch = Float.parseFloat(parts[6]);
-        return new Home(Material.getMaterial(parts[0]), new Location(w, x, y, z, yaw, pitch));
+
+        Home home = new Home(Material.getMaterial(parts[0]), new Location(w, x, y, z, yaw, pitch));
+        System.out.println("Deserialize Home: " + home);
+
+        return home;
     }
 
     public static boolean isSafe(Location l){

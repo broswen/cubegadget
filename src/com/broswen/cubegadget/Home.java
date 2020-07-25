@@ -10,4 +10,9 @@ public class Home{
         this.material = material;
         this.location = location;
     }
+
+    @Override
+    public String toString() {
+        return material + "," + location;
+    }
 }

@@ -110,6 +110,7 @@ public class GadgetMenu implements Listener {
 
 
         if(i == null || i.getType().equals(this.fillerMaterial) || e.getRawSlot() > 53){
+            e.setCancelled(true);
             return;
         }
 
@@ -127,6 +128,7 @@ public class GadgetMenu implements Listener {
             teleportManager.denyRequest(p);
             return;
         }else if(i.getType().equals(Material.GREEN_BED)) {
+            p.closeInventory();
             p.openInventory(icons);
             return;
         }else if(i.getType().equals(Material.CRAFTING_TABLE)){
