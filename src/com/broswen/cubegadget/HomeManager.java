@@ -7,19 +7,20 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class HomeManager {
 
     private static Logger logger = LogManager.getLogger(HomeManager.class);
 
+    private static final List<Material> dangerousBlocks = Arrays.asList(Material.LAVA);
 
     private final int MAX_HOMES = 9;
     private HashMap<UUID, ArrayList<Home>> playerHomes;
     private TeleportManager teleportManager;
+
+
+
     public HomeManager(TeleportManager teleportManager){
        playerHomes = new HashMap<>();
        this.teleportManager = teleportManager;
@@ -132,7 +133,7 @@ public class HomeManager {
     }
 
     public static boolean isSafe(Location l){
-        return l.getBlock().isPassable() || l.getBlock().getRelative(BlockFace.UP).isPassable();
+        return (l.getBlock().isPassable() || l.getBlock().getRelative(BlockFace.UP).isPassable()) && !dangerousBlocks.contains(l.getBlock().getType()) && !dangerousBlocks.contains(l.getBlock().getRelative(BlockFace.UP).getType());
     }
 
     public void saveHomes(FileConfiguration config) {
