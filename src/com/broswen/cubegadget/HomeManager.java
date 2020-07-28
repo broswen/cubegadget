@@ -143,13 +143,13 @@ public class HomeManager {
             for(Home h : homes){
                 strHomes.add(serializeHome(h));
             }
-            config.set(uuid.toString(), strHomes);
+            config.set("homes." + uuid.toString(), strHomes);
         }
 
     }
 
     public void loadHomes(FileConfiguration config) {
-        for(String k : config.getKeys(false)){
+        for(String k : config.getConfigurationSection("homes").getKeys(false)){
             UUID uuid = UUID.fromString(k);
             List<String> homes = config.getStringList(k);
             ArrayList<Home> locHomes = new ArrayList<>();
