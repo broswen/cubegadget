@@ -9,6 +9,9 @@ import org.bukkit.entity.Player;
 
 import java.util.*;
 
+import static com.broswen.cubegadget.CubeGadget.preferenceManager;
+import static com.broswen.cubegadget.CubeGadget.teleportManager;
+
 public class HomeManager {
 
     private static Logger logger = LogManager.getLogger(HomeManager.class);
@@ -17,13 +20,10 @@ public class HomeManager {
 
     private final int MAX_HOMES = 9;
     private HashMap<UUID, ArrayList<Home>> playerHomes;
-    private TeleportManager teleportManager;
 
 
-
-    public HomeManager(TeleportManager teleportManager){
+    public HomeManager(){
        playerHomes = new HashMap<>();
-       this.teleportManager = teleportManager;
     }
 
     public void addHome(Player p, Location location, Material material){
@@ -38,14 +38,13 @@ public class HomeManager {
             return;
         }
 
-        if(!isSafe(location)){
+        if(!isSafe(location) && !preferenceManager.getPreferences(p.getUniqueId()).getOrDefault("IgnoreUnsafe", false)){
             p.sendMessage("[] The specified location is unsafe.");
             p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_COW_BELL, 1, .5f);
             return;
         }
         p.sendMessage("[] A new home has been added.");
         p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1, 1);
-        p.closeInventory();
         playerHomes.get(p.getUniqueId()).add(new Home(material, location));
     }
 
@@ -57,7 +56,6 @@ public class HomeManager {
         ArrayList<Home> homes = playerHomes.get(p.getUniqueId());
         p.sendMessage("[] A home has been removed.");
         p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_COW_BELL, 1, .5f);
-        p.closeInventory();
         playerHomes.get(p.getUniqueId()).remove(index);
     }
 
@@ -77,7 +75,7 @@ public class HomeManager {
             return;
         }
         Home home = playerHomes.get(p.getUniqueId()).get(index);
-        if(!isSafe(home.location)){
+        if(!isSafe(home.location) && !preferenceManager.getPreferences(p.getUniqueId()).getOrDefault("IgnoreUnsafe", false)){
             p.sendMessage("[] That home is no longer safe (There are blocks in the way).");
             p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_COW_BELL, 1, .5f);
             return;
@@ -138,23 +136,28 @@ public class HomeManager {
 
     public void saveHomes(FileConfiguration config) {
         for(UUID uuid : playerHomes.keySet()){
+            logger.info("saving homes for: {}", uuid);
             ArrayList<Home> homes = playerHomes.get(uuid);
             ArrayList<String> strHomes = new ArrayList<>();
             for(Home h : homes){
+                logger.info(h);
                 strHomes.add(serializeHome(h));
             }
-            config.set("homes." + uuid.toString(), strHomes);
+            config.getConfigurationSection("homes").set(uuid.toString(), strHomes);
+            //config.set("homes." + uuid.toString(), strHomes);
         }
 
     }
 
     public void loadHomes(FileConfiguration config) {
+        if(config.getConfigurationSection("homes") == null) config.createSection("homes");
         for(String k : config.getConfigurationSection("homes").getKeys(false)){
+            logger.info("loading homes for: {}", k);
             UUID uuid = UUID.fromString(k);
-            List<String> homes = config.getStringList(k);
+            List<String> homes = config.getConfigurationSection("homes").getStringList(k);
             ArrayList<Home> locHomes = new ArrayList<>();
             for(String h : homes){
-                //locHomes.add(deserializeLocation(h));
+                logger.info(h);
                 locHomes.add(deserializeHome(h));
             }
             playerHomes.put(uuid, locHomes);

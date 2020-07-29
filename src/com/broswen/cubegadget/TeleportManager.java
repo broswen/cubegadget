@@ -11,6 +11,8 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import java.util.HashMap;
 import java.util.UUID;
 
+import static com.broswen.cubegadget.CubeGadget.preferenceManager;
+
 public class TeleportManager implements Listener {
 
     private HashMap<UUID, TeleportRequest> lastRequests;
@@ -94,7 +96,7 @@ public class TeleportManager implements Listener {
 
         Location temp = p.getLocation();
 
-        if(!HomeManager.isSafe(lastPositions.get(p.getUniqueId()))){
+        if(!HomeManager.isSafe(lastPositions.get(p.getUniqueId())) && !preferenceManager.getPreferences(p.getUniqueId()).getOrDefault("IgnoreUnsafe", false)){
             p.sendMessage("[] Your last position is no longer safe (There are blocks in the way).");
             p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_COW_BELL, 1, .5f);
             return;

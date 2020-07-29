@@ -13,21 +13,17 @@ import org.bukkit.inventory.meta.SkullMeta;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import static com.broswen.cubegadget.CubeGadget.*;
+
 public class GadgetMenu implements Listener {
     private Inventory inventory, icons;
     private Material fillerMaterial;
-    private TeleportManager teleportManager;
-    private HomeManager homeManager;
-    private CooldownManager cooldownManager;
     private Player owner;
-    public GadgetMenu(Player owner, TeleportManager teleportManager, HomeManager homeManager, CooldownManager cooldownManager, Material filler){
+    public GadgetMenu(Player owner, Material filler){
         inventory = Bukkit.createInventory(null, 54, "CubeGadget");
         icons = Bukkit.createInventory(null, 9, "Icons");
         this.owner = owner;
         this.fillerMaterial = filler;
-        this.teleportManager = teleportManager;
-        this.homeManager = homeManager;
-        this.cooldownManager = cooldownManager;
 
         //setting icon chooser inventory
         setIcon(icons, 0, Material.GRASS_BLOCK, "Grass");
@@ -40,9 +36,21 @@ public class GadgetMenu implements Listener {
         setIcon(icons, 7, Material.NETHER_BRICKS, "Nether Bricks");
         setIcon(icons, 8, Material.PRISMARINE, "Prismarine");
 
-        setIcon(inventory,1, Material.GREEN_CONCRETE, "ACCEPT REQUEST", "Accept teleport request");
-        setIcon(inventory,3, Material.RED_CONCRETE, "DENY REQUEST", "Deny teleport request");
-        setIcon(inventory, 5, Material.GREEN_BED, "ADD HOME", "Shift + Click to remove homes");
+        populate();
+    }
+
+    private void populate(){
+        inventory.clear();
+
+        setIcon(inventory,0, Material.GREEN_CONCRETE, "ACCEPT REQUEST", "Accept teleport request");
+        setIcon(inventory,1, Material.RED_CONCRETE, "DENY REQUEST", "Deny teleport request");
+        setIcon(inventory, 2, Material.GREEN_BED, "ADD HOME", "Shift + Click to remove homes");
+
+        if(preferenceManager.getPreferences(owner.getUniqueId()).getOrDefault("IgnoreUnsafe", false)){
+            setIcon(inventory, 6, Material.LAVA_BUCKET, "UNSAFE", "Ignoring unsafe location warning.");
+        }else{
+            setIcon(inventory, 6, Material.WATER_BUCKET, "SAFE", "Prevent Unsafe locations.");
+        }
 
         Location lastPosition = teleportManager.getLastPosition(owner);
         if(lastPosition == null){
@@ -116,6 +124,8 @@ public class GadgetMenu implements Listener {
 
         if(e.getInventory() == icons){
             homeManager.addHome(p, p.getLocation(), i.getType());
+            populate();
+            show(p);
             return;
         }
 
@@ -134,6 +144,11 @@ public class GadgetMenu implements Listener {
         }else if(i.getType().equals(Material.CRAFTING_TABLE)){
             p.openWorkbench(p.getLocation(),true);
             return;
+        }else if(i.getType().equals(Material.LAVA_BUCKET) || i.getType().equals(Material.WATER_BUCKET)){
+            boolean temp = preferenceManager.getPreferences(p.getUniqueId()).getOrDefault("IgnoreUnsafe", false);
+            preferenceManager.getPreferences(p.getUniqueId()).put("IgnoreUnsafe", !temp);
+            populate();
+            return;
         }
 
         if(!cooldownManager.canAction(p)){
@@ -151,6 +166,7 @@ public class GadgetMenu implements Listener {
             int index = e.getRawSlot() - 9;
             if(e.isShiftClick()){
                 homeManager.removeHome(p, index);
+                populate();
             }else{
                 homeManager.goToHome(p, index);
             }

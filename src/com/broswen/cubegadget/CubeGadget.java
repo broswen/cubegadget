@@ -8,6 +8,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -15,6 +16,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class CubeGadget extends JavaPlugin implements Listener {
     public static TeleportManager teleportManager;
     public static HomeManager homeManager;
+    public static PreferenceManager preferenceManager;
     public static CooldownManager cooldownManager;
     public static Inventory icons;
 
@@ -26,6 +28,7 @@ public class CubeGadget extends JavaPlugin implements Listener {
         HandlerList.unregisterAll((Listener) this);
 
         homeManager.saveHomes(getConfig());
+        preferenceManager.savePreferences(getConfig());
         saveConfig();
 
     }
@@ -41,12 +44,14 @@ public class CubeGadget extends JavaPlugin implements Listener {
 
         getServer().getPluginManager().registerEvents(this, this);
         teleportManager = new TeleportManager();
-        homeManager = new HomeManager(teleportManager);
+        homeManager = new HomeManager();
+        preferenceManager = new PreferenceManager();
         cooldownManager = new CooldownManager();
 
 
         getServer().getPluginManager().registerEvents(teleportManager, this);
         homeManager.loadHomes(getConfig());
+        preferenceManager.loadPreferences(getConfig());
     }
 
     @EventHandler
@@ -66,8 +71,13 @@ public class CubeGadget extends JavaPlugin implements Listener {
             teleportManager.back(p);
             return;
         }
-        GadgetMenu menu = new GadgetMenu(p, teleportManager, homeManager, cooldownManager, Material.GRAY_STAINED_GLASS_PANE);
+        GadgetMenu menu = new GadgetMenu(p, Material.GRAY_STAINED_GLASS_PANE);
         menu.show(p);
         getServer().getPluginManager().registerEvents(menu, this);
+    }
+
+    @EventHandler
+    public void onJoin(PlayerJoinEvent e){
+        System.out.println(preferenceManager.getPreferences(e.getPlayer().getUniqueId()).getOrDefault("IgnoreUnsafe", false));
     }
 }
