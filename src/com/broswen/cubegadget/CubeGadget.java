@@ -3,6 +3,7 @@ package com.broswen.cubegadget;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.craftbukkit.libs.jline.console.history.History;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
@@ -18,6 +19,7 @@ public class CubeGadget extends JavaPlugin implements Listener {
     public static HomeManager homeManager;
     public static PreferenceManager preferenceManager;
     public static CooldownManager cooldownManager;
+    public static HistoryManager historyManager;
     public static Inventory icons;
 
     @Override
@@ -43,6 +45,7 @@ public class CubeGadget extends JavaPlugin implements Listener {
         this.saveDefaultConfig();
 
         getServer().getPluginManager().registerEvents(this, this);
+        historyManager = new HistoryManager();
         teleportManager = new TeleportManager();
         homeManager = new HomeManager();
         preferenceManager = new PreferenceManager();

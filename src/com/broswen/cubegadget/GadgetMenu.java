@@ -12,6 +12,7 @@ import org.bukkit.inventory.meta.SkullMeta;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import static com.broswen.cubegadget.CubeGadget.*;
 
@@ -45,6 +46,8 @@ public class GadgetMenu implements Listener {
         setIcon(inventory,0, Material.GREEN_CONCRETE, "ACCEPT REQUEST", "Accept teleport request");
         setIcon(inventory,1, Material.RED_CONCRETE, "DENY REQUEST", "Deny teleport request");
         setIcon(inventory, 2, Material.GREEN_BED, "ADD HOME", "Shift + Click to remove homes");
+
+        setIcon(inventory, 5, Material.BOOK, "History", "Teleport history.");
 
         if(preferenceManager.getPreferences(owner.getUniqueId()).getOrDefault("IgnoreUnsafe", false)){
             setIcon(inventory, 6, Material.LAVA_BUCKET, "UNSAFE", "Ignoring unsafe location warning.");
@@ -99,9 +102,12 @@ public class GadgetMenu implements Listener {
         setIcon(inv, position,material,title, "");
     }
     public static void setIcon(Inventory inv, int position, Material material, String title, String desc){
+        setIcon(inv, position, material, title, Arrays.asList(desc));
+    }
+    public static void setIcon(Inventory inv, int position, Material material, String title, List<String> desc){
         ItemStack i = new ItemStack(material);
         ItemMeta im = i.getItemMeta();
-        im.setLore(Arrays.asList(desc));
+        im.setLore(desc);
         im.setDisplayName(title);
         i.setItemMeta(im);
         inv.setItem(position, i);
@@ -149,6 +155,9 @@ public class GadgetMenu implements Listener {
             preferenceManager.getPreferences(p.getUniqueId()).put("IgnoreUnsafe", !temp);
             populate();
             return;
+        }else if(i.getType().equals(Material.BOOK)){
+            p.closeInventory();
+            //TODO
         }
 
         if(!cooldownManager.canAction(p)){

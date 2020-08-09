@@ -11,6 +11,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import java.util.HashMap;
 import java.util.UUID;
 
+import static com.broswen.cubegadget.CubeGadget.historyManager;
 import static com.broswen.cubegadget.CubeGadget.preferenceManager;
 
 public class TeleportManager implements Listener {
@@ -56,11 +57,13 @@ public class TeleportManager implements Listener {
         req.from.sendMessage("[] " + ChatColor.YELLOW + accepter.getDisplayName() + ChatColor.RESET + " accepted your request.");
 
         if(req.pull){
+            historyManager.addToHistory(accepter, HomeManager.createFromLocation(accepter.getLocation()));
             lastPositions.put(accepter.getUniqueId(), accepter.getLocation());
             accepter.getWorld().playSound(accepter.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1, 1);
             accepter.teleport(req.from.getLocation());
             accepter.getWorld().playSound(accepter.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1, 1);
         }else{
+            historyManager.addToHistory(req.from, HomeManager.createFromLocation(req.from.getLocation()));
             lastPositions.put(req.from.getUniqueId(), req.from.getLocation());
             req.from.getWorld().playSound(req.from.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1, 1);
             req.from.teleport(accepter.getLocation());
@@ -101,6 +104,8 @@ public class TeleportManager implements Listener {
             p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_COW_BELL, 1, .5f);
             return;
         }
+        historyManager.addToHistory(p, HomeManager.createFromLocation(p.getLocation()));
+
         p.getWorld().playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1, 1);
         Location teleport = lastPositions.get((p.getUniqueId()));
         teleport.getWorld().refreshChunk(teleport.getChunk().getX(), teleport.getChunk().getZ());

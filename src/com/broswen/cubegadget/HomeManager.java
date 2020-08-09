@@ -1,16 +1,19 @@
 package com.broswen.cubegadget;
 
+import net.minecraft.server.v1_16_R1.ItemMapEmpty;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.*;
 
-import static com.broswen.cubegadget.CubeGadget.preferenceManager;
-import static com.broswen.cubegadget.CubeGadget.teleportManager;
+import static com.broswen.cubegadget.CubeGadget.*;
 
 public class HomeManager {
 
@@ -80,6 +83,7 @@ public class HomeManager {
             p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_COW_BELL, 1, .5f);
             return;
         }
+        historyManager.addToHistory(p, HomeManager.createFromLocation(p.getLocation()));
         teleportManager.updateLastPosition(p);
         p.getWorld().playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1, 1);
         home.location.getWorld().refreshChunk(home.location.getChunk().getX(), home.location.getChunk().getZ());
@@ -162,6 +166,12 @@ public class HomeManager {
             }
             playerHomes.put(uuid, locHomes);
         }
+    }
+
+    public static Home createFromLocation(Location l){
+        Home h = new Home(l.getBlock().getRelative(BlockFace.DOWN).getType(), l);
+        h.setInfo(Arrays.asList(l.getWorld().getName(), l.getWorld().getBiome(l.getBlockX(), l.getBlockY(), l.getBlockZ()).name()));
+        return h;
     }
 }
 
