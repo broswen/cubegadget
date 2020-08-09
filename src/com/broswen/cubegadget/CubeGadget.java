@@ -74,7 +74,7 @@ public class CubeGadget extends JavaPlugin implements Listener {
             teleportManager.back(p);
             return;
         }
-        GadgetMenu menu = new GadgetMenu(p, Material.GRAY_STAINED_GLASS_PANE);
+        GadgetMenu menu = new GadgetMenu(p, Material.GRAY_STAINED_GLASS_PANE, this);
         menu.show(p);
         getServer().getPluginManager().registerEvents(menu, this);
     }

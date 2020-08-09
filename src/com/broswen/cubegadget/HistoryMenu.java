@@ -34,6 +34,10 @@ public class HistoryMenu implements Listener {
         }
     }
 
+    public void show(Player p){
+        p.openInventory(this.inventory);
+    }
+
     @EventHandler
     public void onInventoryClick(InventoryClickEvent e) {
         //ignore if not this menu

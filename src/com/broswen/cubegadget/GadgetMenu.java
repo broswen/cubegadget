@@ -9,6 +9,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.plugin.Plugin;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,11 +21,13 @@ public class GadgetMenu implements Listener {
     private Inventory inventory, icons;
     private Material fillerMaterial;
     private Player owner;
-    public GadgetMenu(Player owner, Material filler){
+    private Plugin plugin;
+    public GadgetMenu(Player owner, Material filler, Plugin plugin){
         inventory = Bukkit.createInventory(null, 54, "CubeGadget");
         icons = Bukkit.createInventory(null, 9, "Icons");
         this.owner = owner;
         this.fillerMaterial = filler;
+        this.plugin = plugin;
 
         //setting icon chooser inventory
         setIcon(icons, 0, Material.GRASS_BLOCK, "Grass");
@@ -157,7 +160,9 @@ public class GadgetMenu implements Listener {
             return;
         }else if(i.getType().equals(Material.BOOK)){
             p.closeInventory();
-            //TODO
+            HistoryMenu hm = new HistoryMenu(p);
+            this.plugin.getServer().getPluginManager().registerEvents(hm, this.plugin);
+            hm.show(p);
         }
 
         if(!cooldownManager.canAction(p)){
