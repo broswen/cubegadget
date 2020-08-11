@@ -109,6 +109,7 @@ public class GadgetMenu implements Listener {
     }
     public static void setIcon(Inventory inv, int position, Material material, String title, List<String> desc){
         ItemStack i = new ItemStack(material);
+        if(i.getType().equals(Material.AIR)) i = new ItemStack(Material.BARRIER);
         ItemMeta im = i.getItemMeta();
         im.setLore(desc);
         im.setDisplayName(title);
