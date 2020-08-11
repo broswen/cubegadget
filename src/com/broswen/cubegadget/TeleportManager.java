@@ -88,6 +88,24 @@ public class TeleportManager implements Listener {
         req.from.playSound(req.from.getLocation(), Sound.BLOCK_NOTE_BLOCK_COW_BELL,1, .5f);
     }
 
+    public void teleport(Player p, Home home){
+        Location temp = p.getLocation();
+
+        if(!HomeManager.isSafe(home.location) && !preferenceManager.getPreferences(p.getUniqueId()).getOrDefault("IgnoreUnsafe", false)){
+            p.sendMessage("[] That position is no longer safe (There are blocks in the way).");
+            p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_COW_BELL, 1, .5f);
+            return;
+        }
+        historyManager.addToHistory(p, HomeManager.createFromLocation(p.getLocation()));
+
+        p.getWorld().playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1, 1);
+        Location teleport = home.location;
+        teleport.getWorld().refreshChunk(teleport.getChunk().getX(), teleport.getChunk().getZ());
+        p.teleport(teleport);
+        p.getWorld().playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1, 1);
+        lastPositions.put(p.getUniqueId(), temp);
+    }
+
     public void back(Player p) {
         if(!lastPositions.containsKey(p.getUniqueId())){
             p.sendMessage("[] You don't have a previous location.");

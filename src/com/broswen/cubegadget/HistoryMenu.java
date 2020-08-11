@@ -10,7 +10,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.LinkedList;
 
-import static com.broswen.cubegadget.CubeGadget.historyManager;
+import static com.broswen.cubegadget.CubeGadget.*;
 
 public class HistoryMenu implements Listener {
 
@@ -52,5 +52,17 @@ public class HistoryMenu implements Listener {
             e.setCancelled(true);
             return;
         }
+
+        if(!cooldownManager.canAction(p)){
+            p.sendMessage("[] Please wait " + cooldownManager.DELAY/1000 + " seconds between teleports.");
+            return;
+        }
+
+        cooldownManager.setLastAction(p);
+
+        Home h = historyManager.getHistory(p).get(e.getRawSlot());
+
+        teleportManager.teleport(p, h);
+
     }
 }
